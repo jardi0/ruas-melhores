@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pedras de Fogo - Ruas em Foco</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+
+  /* ============ FUNDO NATUREZA DECORADO ============ */
+  body {
+    background:
+      radial-gradient(circle at 5% 5%, rgba(139,195,74,0.30), transparent 35%),
+      radial-gradient(circle at 95% 15%, rgba(76,175,80,0.25), transparent 35%),
+      radial-gradient(circle at 20% 95%, rgba(46,125,50,0.20), transparent 40%),
+      radial-gradient(circle at 90% 90%, rgba(174,213,129,0.30), transparent 40%),
+      linear-gradient(180deg, #f1f8e9 0%, #e8f5e9 50%, #dcedc8 100%);
+    background-attachment: fixed;
+    color: #1b3a1f; line-height: 1.6;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  /* Folhas decorativas flutuantes no fundo */
+  body::before {
+    content: '🍃';
+    position: fixed; top: 15%; left: 3%; font-size: 3rem;
+    opacity: 0.15; transform: rotate(-25deg);
+    animation: flutuar 8s ease-in-out infinite;
+    pointer-events: none; z-index: 0;
+  }
+  body::after {
+    content: '🌿';
+    position: fixed; bottom: 10%; right: 4%; font-size: 3.5rem;
+    opacity: 0.15; transform: rotate(20deg);
+    animation: flutuar 10s ease-in-out infinite reverse;
+    pointer-events: none; z-index: 0;
+  }
+  @keyframes flutuar {
+    0%, 100% { transform: translateY(0) rotate(-25deg); }
+    50% { transform: translateY(-20px) rotate(-15deg); }
+  }
+
+  /* ============ HEADER FOLHA DECORADO ============ */
+  header {
+    background:
+      radial-gradient(circle at 80% 20%, rgba(255,255,255,0.20), transparent 50%),
+      radial-gradient(circle at 15% 80%, rgba(174,213,129,0.30), transparent 50%),
+      linear-gradient(135deg, #1b5e20 0%, #2e7d32 45%, #43a047 100%);
+    color: white; padding: 40px 20px 32px; text-align: center;
+    box-shadow: 0 10px 32px rgba(27,94,32,0.42);
+    position: relative; overflow: hidden;
+  }
+  /* Padrão de folhas decorativas no header */
+  header::before {
+    content: '🌿 🍃 🌱 🍃 🌿';
+    position: absolute; top: 12px; left: 0; right: 0;
+    text-align: center; font-size: 1rem;
+    opacity: 0.35; letter-spacing: 18px;
+    pointer-events: none;
+  }
+  header::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 6px;
+    background: linear-gradient(90deg, #aed581, #7cb342, #558b2f, #7cb342, #aed581);
+  }
+
+  /* Barra de usuário logado */
+  .top-bar {
+    position: absolute; top: 14px; right: 20px;
+    display: flex; align-items: center; gap: 10px;
+    z-index: 10;
+  }
+  .user-pill {
+    background: rgba(255,255,255,0.22);
+    border: 1px solid rgba(255,255,255,0.35);
+    color: white; padding: 7px 14px; border-radius: 20px;
+    font-size: 0.85rem; font-weight: 600;
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; gap: 7px;
+  }
+  .user-pill .avatar {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: linear-gradient(135deg, #aed581, #7cb342);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; color: #1b5e20; font-weight: bold;
+  }
+  .btn-logout {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.35);
+    color: white; padding: 7px 12px; border-radius: 20px;
+    font-size: 0.8rem; font-weight: 600; cursor: pointer;
+    transition: 0.25s;
+  }
+  .btn-logout:hover {
+    background: rgba(255,255,255,0.32);
+    transform: translateY(-1px);
+  }
+
+  header h1 {
+    font-size: 2.2rem; margin-bottom: 8px; position: relative; z-index: 2;
+    text-shadow: 2px 2px 12px rgba(0,0,0,0.35);
+    letter-spacing: 0.5px;
+  }
+  header p { opacity: 0.98; font-size: 1rem; position: relative; z-index: 2; }
+
+  .badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #aed581, #7cb342);
+    color: #1b3a1f;
+    padding: 7px 20px; border-radius: 20px; font-weight: 700;
+    font-size: 0.85rem; margin-top: 14px;
+    position: relative; z-index: 2;
+    box-shadow: 0 5px 16px rgba(124,179,66,0.55);
+    border: 1px solid rgba(255,255,255,0.4);
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; position: relative; z-index: 1; }
+
+  /* ============ TELA DE LOGIN ============ */
+  .auth-screen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 20px; position: relative; z-index: 5;
+  }
+  .auth-card {
+    background: linear-gradient(180deg, #ffffff 0%, #f7fbf5 100%);
+    border-radius: 22px; padding: 40px 34px;
+    box-shadow: 0 20px 60px rgba(27,94,32,0.28);
+    width: 100%; max-width: 440px;
+    border-top: 8px solid #43a047;
+    border-left: 1px solid #dcedc8;
+    border-right: 1px solid #dcedc8;
+    border-bottom: 1px solid #dcedc8;
+    position: relative;
+    animation: aparecer 0.5s ease;
+  }
+  @keyframes aparecer {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .auth-card::before {
+    content: '🌿';
+    position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+    font-size: 2.4rem;
+    background: #ffffff; padding: 0 12px;
+    filter: drop-shadow(0 4px 8px rgba(27,94,32,0.25));
+  }
+
+  .auth-card h2 {
+    color: #1b5e20; text-align: center; font-size: 1.6rem;
+    margin-bottom: 6px;
+  }
+  .auth-card .subtitle {
+    text-align: center; color: #4a6b4a; font-size: 0.9rem;
+    margin-bottom: 22px;
+  }
+
+  .tabs {
+    display: flex; background: #e8f5e9; border-radius: 12px;
+    padding: 5px; margin-bottom: 22px; gap: 4px;
+  }
+  .tab {
+    flex: 1; padding: 10px; text-align: center;
+    border-radius: 9px; cursor: pointer; font-weight: 700;
+    color: #4a6b4a; font-size: 0.9rem;
+    transition: 0.25s; border: none; background: transparent;
+  }
+  .tab.active {
+    background: linear-gradient(135deg, #2e7d32, #43a047);
+    color: white;
+    box-shadow: 0 4px 12px rgba(27,94,32,0.30);
+  }
+
+  .auth-card label {
+    display: block; font-weight: 700; margin: 12px 0 6px;
+    font-size: 0.88rem; color: #2e4d2a;
+  }
+  .auth-card input {
+    width: 100%; padding: 12px 14px;
+    border: 2px solid #c5e1a5;
+    border-radius: 10px; font-size: 0.95rem;
+    background: #f9fdf6; color: #1b3a1f;
+    transition: 0.25s;
+  }
+  .auth-card input:focus {
+    outline: none; border-color: #43a047;
+    box-shadow: 0 0 0 4px rgba(67,160,71,0.18);
+    background: #ffffff;
+  }
+
+  .auth-card .btn {
+    margin-top: 20px;
+  }
+  .msg {
+    padding: 10px 14px; border-radius: 10px; font-size: 0.85rem;
+    margin-top: 14px; display: none; font-weight: 600;
+  }
+  .msg.erro {
+    background: linear-gradient(135deg, #ffebee, #ffcdd2);
+    color: #b71c1c; border-left: 4px solid #d32f2f;
+    display: block;
+  }
+  .msg.sucesso {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    color: #1b5e20; border-left: 4px solid #43a047;
+    display: block;
+  }
+
+  /* ============ ESTATÍSTICAS DECORADAS ============ */
+  .stats { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; }
+  .stat {
+    flex: 1; min-width: 130px; color: white;
+    padding: 20px 14px; border-radius: 18px; text-align: center;
+    box-shadow: 0 8px 22px rgba(27,94,32,0.22);
+    transition: transform 0.28s, box-shadow 0.28s;
+    position: relative; overflow: hidden;
+  }
+  .stat::before {
+    content: ''; position: absolute; top: -40%; right: -20%;
+    width: 120px; height: 120px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.28), transparent 70%);
+  }
+  .stat::after {
+    content: attr(data-icon);
+    position: absolute; bottom: 6px; right: 12px;
+    font-size: 1.6rem; opacity: 0.30;
+  }
+  .stat:hover { transform: translateY(-6px); box-shadow: 0 14px 30px rgba(27,94,32,0.35); }
+  .stat span {
+    display: block; font-size: 2.1rem; font-weight: bold;
+    text-shadow: 1px 1px 5px rgba(0,0,0,0.25);
+    position: relative; z-index: 1;
+  }
+  .stat small {
+    font-size: 0.82rem; opacity: 0.96; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    position: relative; z-index: 1;
+  }
+
+  .stat.total { background: linear-gradient(135deg, #2e7d32, #66bb6a); }
+  .stat.alta  { background: linear-gradient(135deg, #558b2f, #8bc34a); }
+  .stat.pend  { background: linear-gradient(135deg, #33691e, #689f38); }
+
+  /* ============ GRID E CARDS DECORADOS ============ */
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 850px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: linear-gradient(180deg, #ffffff 0%, #f7fbf5 100%);
+    border-radius: 18px; padding: 24px;
+    box-shadow: 0 6px 24px rgba(27,94,32,0.14);
+    border: 1px solid #dcedc8;
+    border-top: 6px solid #43a047;
+    transition: box-shadow 0.28s, transform 0.28s;
+    position: relative; overflow: hidden;
+  }
+  .card::before {
+    content: ''; position: absolute;
+    top: -30px; right: -30px; width: 100px; height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(174,213,129,0.20), transparent 70%);
+    pointer-events: none;
+  }
+  .card:hover {
+    box-shadow: 0 12px 34px rgba(27,94,32,0.22);
+    transform: translateY(-3px);
+  }
+
+  .card.form { border-top-color: #2e7d32; }
+  .card.lista-card { border-top-color: #7cb342; }
+
+  .card h2 {
+    margin-bottom: 18px; font-size: 1.3rem;
+    display: flex; align-items: center; gap: 8px;
+    position: relative; z-index: 1;
+  }
+  .card.form h2 { color: #1b5e20; }
+  .card.lista-card h2 { color: #33691e; }
+
+  /* ============ FORMULÁRIO ============ */
+  label {
+    display: block; font-weight: 700; margin: 14px 0 6px;
+    font-size: 0.9rem; color: #2e4d2a;
+  }
+  input[type="text"], input[type="file"], textarea, select {
+    width: 100%; padding: 11px 13px;
+    border: 2px solid #c5e1a5;
+    border-radius: 10px; font-size: 0.95rem; transition: 0.25s;
+    background: #f9fdf6; color: #1b3a1f;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: none; border-color: #43a047;
+    box-shadow: 0 0 0 4px rgba(67,160,71,0.18);
+    background: #ffffff;
+  }
+  textarea { resize: vertical; min-height: 85px; }
+
+  /* ============ BOTÃO FOLHA ============ */
+  .btn {
+    background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 45%, #66bb6a 100%);
+    background-size: 200% auto;
+    color: white; border: none; padding: 15px 22px;
+    border-radius: 12px; font-size: 1.02rem; font-weight: 700;
+    cursor: pointer; margin-top: 18px; width: 100%;
+    transition: 0.35s; letter-spacing: 0.4px;
+    box-shadow: 0 6px 18px rgba(27,94,32,0.42);
+  }
+  .btn:hover:not(:disabled) {
+    background-position: right center;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(27,94,32,0.58);
+  }
+  .btn:disabled { background: #b6c9b6; cursor: not-allowed; box-shadow: none; }
+
+  #preview {
+    margin-top: 12px; max-width: 100%; border-radius: 12px;
+    display: none; border: 3px solid #aed581;
+    box-shadow: 0 6px 18px rgba(67,160,71,0.28);
+  }
+
+  /* ============ CAIXA IA DECORADA ============ */
+  .ia-box {
+    background: linear-gradient(135deg, #f1f8e9, #dcedc8);
+    border-left: 5px solid #7cb342;
+    padding: 16px; border-radius: 12px; margin-top: 16px;
+    font-size: 0.9rem; display: none;
+    box-shadow: 0 4px 16px rgba(124,179,66,0.25);
+    position: relative;
+  }
+  .ia-box::before {
+    content: '🌿'; position: absolute; top: -12px; right: 14px;
+    background: white; padding: 0 6px; font-size: 1.1rem;
+    border-radius: 50%;
+  }
+  .ia-box.ativo { display: block; animation: fadeIn 0.4s ease; }
+  .ia-box strong { color: #1b5e20; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .progresso {
+    height: 12px; background: #dcedc8; border-radius: 10px;
+    overflow: hidden; margin: 10px 0;
+    border: 1px solid #c5e1a5;
+  }
+  .progresso > div {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, #8bc34a, #43a047, #1b5e20);
+    background-size: 200% 100%;
+    transition: width 0.4s;
+    animation: shimmer 2s linear infinite;
+  }
+  @keyframes shimmer {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+  /* ============ LISTA ============ */
+  .lista {
+    margin-top: 8px; max-height: 620px; overflow-y: auto;
+    padding-right: 6px;
+  }
+  .lista::-webkit-scrollbar { width: 9px; }
+  .lista::-webkit-scrollbar-track { background: #e8f5e9; border-radius: 10px; }
+  .lista::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #66bb6a, #2e7d32);
+    border-radius: 10px;
+  }
+
+  .item {
+    background: linear-gradient(135deg, #ffffff 0%, #f7fbf5 100%);
+    border: 1px solid #dcedc8;
+    border-left: 5px solid #43a047;
+    border-radius: 14px; padding: 14px; margin-bottom: 12px;
+    display: flex; gap: 12px; align-items: flex-start;
+    transition: 0.28s;
+    box-shadow: 0 2px 10px rgba(27,94,32,0.06);
+    position: relative;
+  }
+  .item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 6px 22px rgba(27,94,32,0.20);
+    border-left-width: 7px;
+  }
+  .item.p-alta { border-left-color: #2e7d32; }
+  .item.p-media { border-left-color: #689f38; }
+  .item.p-baixa { border-left-color: #aed581; }
+
+  .item img {
+    width: 90px; height: 90px; object-fit: cover; border-radius: 10px;
+    flex-shrink: 0; border: 2px solid #c5e1a5;
+    box-shadow: 0 3px 10px rgba(27,94,32,0.15);
+  }
+  .item .info { flex: 1; min-width: 0; }
+  .item .info h3 {
+    font-size: 1rem; margin-bottom: 4px; color: #1b5e20;
+    word-wrap: break-word;
+  }
+  .item .info p {
+    font-size: 0.85rem; color: #3d5a3d; margin-bottom: 6px;
+    word-wrap: break-word;
+  }
+  .item .autor {
+    font-size: 0.72rem; color: #6b8a6b;
+    display: flex; align-items: center; gap: 5px;
+    margin-bottom: 6px;
+  }
+
+  .tag {
+    display: inline-block; padding: 4px 12px; border-radius: 12px;
+    font-size: 0.72rem; font-weight: 700; margin-right: 6px;
+    letter-spacing: 0.5px;
+    border: 1px solid rgba(0,0,0,0.06);
+  }
+  .tag.alta {
+    background: linear-gradient(135deg, #a5d6a7, #66bb6a);
+    color: #1b5e20;
+  }
+  .tag.media {
+    background: linear-gradient(135deg, #c5e1a5, #aed581);
+    color: #33691e;
+  }
+  .tag.baixa {
+    background: linear-gradient(135deg, #dcedc8, #c5e1a5);
+    color: #558b2f;
+  }
+  .tag.status {
+    background: linear-gradient(135deg, #e8f5e9, #dcedc8);
+    color: #2e7d32;
+  }
+
+  .empty {
+    text-align: center; color: #6b8a6b; padding: 40px 20px;
+    font-style: italic; font-size: 0.95rem;
+  }
+  .empty::before { content: '🌱 '; font-style: normal; font-size: 1.5rem; }
+
+  /* ============ FOOTER DECORADO ============ */
+  footer {
+    text-align: center; padding: 26px; color: #4a6b4a; font-size: 0.85rem;
+    border-top: 2px solid #c5e1a5; margin-top: 30px;
+    background: linear-gradient(180deg, transparent, rgba(220,237,200,0.7));
+    font-weight: 500;
+    position: relative;
+  }
+  footer::before {
+    content: '🌳 🌿 🌱 🌿 🌳';
+    display: block; font-size: 1rem; opacity: 0.5;
+    margin-bottom: 8px; letter-spacing: 8px;
+  }
+
+  /* ============ ESCONDER / MOSTRAR ============ */
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ==================== TELA DE LOGIN ==================== -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <h2>Bem-vindo(a)!</h2>
+    <p class="subtitle">Entre ou cadastre-se para reportar problemas nas ruas de Pedras de Fogo</p>
+
+    <div class="tabs">
+      <button class="tab active" id="tabLogin" onclick="trocarTab('login')">🔑 Entrar</button>
+      <button class="tab" id="tabCadastro" onclick="trocarTab('cadastro')">🌱 Cadastrar</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="formLogin">
+      <label for="loginEmail">E-mail</label>
+      <input type="text" id="loginEmail" placeholder="seu@email.com">
+
+      <label for="loginSenha">Senha</label>
+      <input type="password" id="loginSenha" placeholder="••••••••">
+
+      <button class="btn" onclick="fazerLogin()">🔑 Entrar</button>
+    </div>
+
+    <!-- CADASTRO -->
+    <div id="formCadastro" class="hidden">
+      <label for="cadNome">Nome completo</label>
+      <input type="text" id="cadNome" placeholder="Seu nome">
+
+      <label for="cadEmail">E-mail</label>
+      <input type="text" id="cadEmail" placeholder="seu@email.com">
+
+      <label for="cadSenha">Senha (mín. 4 caracteres)</label>
+      <input type="password" id="cadSenha" placeholder="••••••••">
+
+      <button class="btn" onclick="fazerCadastro()">🌱 Criar conta</button>
+    </div>
+
+    <div class="msg" id="authMsg"></div>
+  </div>
+</div>
+
+<!-- ==================== APP PRINCIPAL ==================== -->
+<div id="appPrincipal" class="hidden">
+
+  <header>
+    <div class="top-bar">
+      <div class="user-pill">
+        <div class="avatar" id="userAvatar">U</div>
+        <span id="userNome">Usuário</span>
+      </div>
+      <button class="btn-logout" onclick="fazerLogout()">Sair</button>
+    </div>
+    <h1>🌿 Pedras de Fogo - Ruas em Foco</h1>
+    <p>Ajude a prefeitura a identificar e priorizar os reparos nas ruas da cidade</p>
+    <div class="badge">🤖 Análise com Inteligência Artificial</div>
+  </header>
+
+  <div class="container">
+    <div class="stats">
+      <div class="stat total" data-icon="📋"><span id="statTotal">0</span><small>Denúncias</small></div>
+      <div class="stat alta" data-icon="⚠️"><span id="statAlta">0</span><small>Prioridade Alta</small></div>
+      <div class="stat pend" data-icon="⏳"><span id="statPendentes">0</span><small>Pendentes</small></div>
+    </div>
+
+    <div class="grid">
+      <!-- FORMULÁRIO -->
+      <div class="card form">
+        <h2>📸 Enviar Denúncia</h2>
+
+        <label for="local">Rua / Local *</label>
+        <input type="text" id="local" placeholder="Ex: Rua São José, próximo ao mercado">
+
+        <label for="tipo">Tipo de problema *</label>
+        <select id="tipo">
+          <option value="buraco">🕳️ Buraco na via</option>
+          <option value="calcamento">🧱 Calçamento deteriorado</option>
+          <option value="erosao">⛰️ Erosão / afundamento</option>
+          <option value="iluminacao">💡 Iluminação pública</option>
+          <option value="outro">📌 Outro</option>
+        </select>
+
+        <label for="descricao">Descrição do problema</label>
+        <textarea id="descricao" placeholder="Descreva o que está acontecendo..."></textarea>
+
+        <label for="midia">Foto ou vídeo (opcional)</label>
+        <input type="file" id="midia" accept="image/*,video/*">
+
+        <img id="preview" alt="Pré-visualização">
+
+        <button class="btn" id="btnEnviar">🌱 Enviar com Análise IA</button>
+
+        <div class="ia-box" id="iaBox">
+          <strong>🤖 Análise da IA:</strong>
+          <div class="progresso"><div id="iaProgress"></div></div>
+          <p id="iaResultado"></p>
+        </div>
+      </div>
+
+      <!-- LISTA -->
+      <div class="card lista-card">
+        <h2>📋 Denúncias Registradas</h2>
+        <div class="lista" id="lista">
+          <div class="empty">Nenhuma denúncia registrada ainda.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Projeto cidadão • Pedras de Fogo - PB • Dados salvos localmente no navegador
+  </footer>
+
+</div>
+
+<script>
+// ===================== CHAVES STORAGE =====================
+const KEY_USUARIOS  = 'pedrasFogoUsuarios';
+const KEY_LOGADO    = 'pedrasFogoLogado';
+const KEY_DENUNCIAS = 'pedrasFogoDenuncias';
+
+// ===================== ESTADO =====================
+let usuarios  = JSON.parse(localStorage.getItem(KEY_USUARIOS) || '[]');
+let denuncias = JSON.parse(localStorage.getItem(KEY_DENUNCIAS) || '[]');
+let usuarioLogado = JSON.parse(localStorage.getItem(KEY_LOGADO) || 'null');
+
+// ===================== TROCA DE TABS =====================
+function trocarTab(tab) {
+  const tabLogin = document.getElementById('tabLogin');
+  const tabCad = document.getElementById('tabCadastro');
+  const formLogin = document.getElementById('formLogin');
+  const formCad = document.getElementById('formCadastro');
+
+  if (tab === 'login') {
+    tabLogin.classList.add('active');
+    tabCad.classList.remove('active');
+    formLogin.classList.remove('hidden');
+    formCad.classList.add('hidden');
+  } else {
+    tabCad.classList.add('active');
+    tabLogin.classList.remove('active');
+    formCad.classList.remove('hidden');
+    formLogin.classList.add('hidden');
+  }
+  esconderMsg();
+}
+
+function mostrarMsg(texto, tipo) {
+  const el = document.getElementById('authMsg');
+  el.textContent = texto;
+  el.className = 'msg ' + tipo;
+}
+function esconderMsg() {
+  const el = document.getElementById('authMsg');
+  el.className = 'msg';
+  el.textContent = '';
+}
+
+// ===================== CADASTRO =====================
+function fazerCadastro() {
+  const nome  = document.getElementById('cadNome').value.trim();
+  const email = document.getElementById('cadEmail').value.trim().toLowerCase();
+  const senha = document.getElementById('cadSenha').value;
+
+  if (!nome || !email || !senha) {
+    return mostrarMsg('⚠️ Preencha todos os campos.', 'erro');
+  }
+  if (senha.length < 4) {
+    return mostrarMsg('⚠️ A senha precisa ter pelo menos 4 caracteres.', 'erro');
+  }
+  if (usuarios.some(u => u.email === email)) {
+    return mostrarMsg('⚠️ Este e-mail já está cadastrado.', 'erro');
+  }
+
+  const novo = { nome, email, senha, criadoEm: new Date().toISOString() };
+  usuarios.push(novo);
+  localStorage.setItem(KEY_USUARIOS, JSON.stringify(usuarios));
+
+  mostrarMsg('✅ Conta criada com sucesso! Faça login.', 'sucesso');
+  setTimeout(() => {
+    trocarTab('login');
+    document.getElementById('loginEmail').value = email;
+  }, 900);
+}
+
+// ===================== LOGIN =====================
+function fazerLogin() {
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const senha = document.getElementById('loginSenha').value;
+
+  if (!email || !senha) {
+    return mostrarMsg('⚠️ Informe e-mail e senha.', 'erro');
+  }
+
+  const user = usuarios.find(u => u.email === email && u.senha === senha);
+  if (!user) {
+    return mostrarMsg('❌ E-mail ou senha incorretos.', 'erro');
+  }
+
+  usuarioLogado = { nome: user.nome, email: user.email };
+  localStorage.setItem(KEY_LOGADO, JSON.stringify(usuarioLogado));
+  mostrarMsg('✅ Bem-vindo(a), ' + user.nome + '!', 'sucesso');
+  setTimeout(entrarApp, 500);
+}
+
+// ===================== LOGOUT =====================
+function fazerLogout() {
+  if (!confirm('Deseja realmente sair?')) return;
+  usuarioLogado = null;
+  localStorage.removeItem(KEY_LOGADO);
+  document.getElementById('appPrincipal').classList.add('hidden');
+  document.getElementById('authScreen').classList.remove('hidden');
+  document.getElementById('loginSenha').value = '';
+  esconderMsg();
+}
+
+// ===================== ENTRAR NO APP =====================
+function entrarApp() {
+  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('appPrincipal').classList.remove('hidden');
+
+  // Atualiza info do usuário no topo
+  document.getElementById('userNome').textContent = usuarioLogado.nome.split(' ')[0];
+  document.getElementById('userAvatar').textContent = usuarioLogado.nome.charAt(0).toUpperCase();
+
+  renderizar();
+}
+
+// ===================== ELEMENTOS DO APP =====================
+const localInput   = document.getElementById('local');
+const tipoInput    = document.getElementById('tipo');
+const descInput    = document.getElementById('descricao');
+const midiaInput   = document.getElementById('midia');
+const preview      = document.getElementById('preview');
+const btnEnviar    = document.getElementById('btnEnviar');
+const iaBox        = document.getElementById('iaBox');
+const iaProgress   = document.getElementById('iaProgress');
+const iaResultado  = document.getElementById('iaResultado');
+const lista        = document.getElementById('lista');
+
+// ===================== PREVIEW DE MÍDIA =====================
+midiaInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) { preview.style.display = 'none'; return; }
+  if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = ev => { preview.src = ev.target.result; preview.style.display = 'block'; };
+    reader.readAsDataURL(file);
+  } else {
+    preview.style.display = 'none';
+  }
+});
+
+// ===================== IA SIMULADA =====================
+function analisarIA(texto, tipo) {
+  texto = (texto || '').toLowerCase();
+
+  const graves = ['grande','perigoso','acidente','risco','profundo','enorme','criança','escola','hospital','idoso','urgente','grave'];
+  const medias = ['médio','carro','moto','pneu','danificado','rachadura','afundou','água','erosão'];
+
+  let pontos = 0;
+  graves.forEach(p => { if (texto.includes(p)) pontos += 3; });
+  medias.forEach(p => { if (texto.includes(p)) pontos += 1; });
+
+  if (tipo === 'buraco') pontos += 2;
+  if (tipo === 'erosao') pontos += 3;
+  if (tipo === 'calcamento') pontos += 1;
+
+  let prioridade = 'baixa', diagnostico = '';
+  if (pontos >= 5) {
+    prioridade = 'alta';
+    diagnostico = 'Risco elevado identificado. Recomenda-se reparo prioritário.';
+  } else if (pontos >= 2) {
+    prioridade = 'media';
+    diagnostico = 'Problema moderado detectado. Programar manutenção em breve.';
+  } else {
+    prioridade = 'baixa';
+    diagnostico = 'Ocorrência leve. Pode aguardar cronograma regular.';
+  }
+
+  const tipos = {
+    buraco: 'Buraco identificado na via',
+    calcamento: 'Calçamento com sinais de deterioração',
+    erosao: 'Erosão/afundamento detectado',
+    iluminacao: 'Problema de iluminação registrado',
+    outro: 'Ocorrência registrada'
+  };
+
+  return {
+    prioridade,
+    diagnostico: `${tipos[tipo] || 'Ocorrência'}. ${diagnostico}`,
+    confianca: Math.min(60 + pontos * 5, 98)
+  };
+}
+
+// ===================== ENVIO =====================
+btnEnviar.addEventListener('click', () => {
+  const local = localInput.value.trim();
+  const tipo = tipoInput.value;
+  const descricao = descInput.value.trim();
+
+  if (!local) {
+    alert('⚠️ Informe a rua/local do problema.');
+    localInput.focus();
+    return;
+  }
+
+  iaBox.classList.add('ativo');
+  iaResultado.textContent = 'Analisando imagem e descrição...';
+  iaProgress.style.width = '0%';
+  btnEnviar.disabled = true;
+
+  let prog = 0;
+  const intervalo = setInterval(() => {
+    prog += 10;
+    iaProgress.style.width = prog + '%';
+    if (prog >= 100) {
+      clearInterval(intervalo);
+      finalizarEnvio(local, tipo, descricao);
+    }
+  }, 120);
+});
+
+function finalizarEnvio(local, tipo, descricao) {
+  const analise = analisarIA(descricao + ' ' + local, tipo);
+
+  iaResultado.innerHTML = `<strong>Prioridade: ${analise.prioridade.toUpperCase()}</strong> (${analise.confianca}% confiança)<br>${analise.diagnostico}`;
+
+  const file = midiaInput.files[0];
+  const salvar = (imagemBase64 = null) => {
+    const denuncia = {
+      id: Date.now(),
+      local, tipo, descricao,
+      imagem: imagemBase64,
+      prioridade: analise.prioridade,
+      diagnostico: analise.diagnostico,
+      confianca: analise.confianca,
+      status: 'Pendente',
+      autor: usuarioLogado ? usuarioLogado.nome : 'Anônimo',
+      data: new Date().toLocaleString('pt-BR')
+    };
+    denuncias.unshift(denuncia);
+    localStorage.setItem(KEY_DENUNCIAS, JSON.stringify(denuncias));
+    renderizar();
+    resetForm();
+  };
+
+  if (file && file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = ev => salvar(ev.target.result);
+    reader.readAsDataURL(file);
+  } else {
+    salvar();
+  }
+}
+
+function resetForm() {
+  localInput.value = '';
+  descInput.value = '';
+  midiaInput.value = '';
+  preview.style.display = 'none';
+  btnEnviar.disabled = false;
+  setTimeout(() => { iaBox.classList.remove('ativo'); }, 4000);
+}
+
+// ===================== RENDERIZAÇÃO =====================
+function renderizar() {
+  document.getElementById('statTotal').textContent = denuncias.length;
+  document.getElementById('statAlta').textContent = denuncias.filter(d => d.prioridade === 'alta').length;
+  document.getElementById('statPendentes').textContent = denuncias.filter(d => d.status === 'Pendente').length;
+
+  if (denuncias.length === 0) {
+    lista.innerHTML = '<div class="empty">Nenhuma denúncia registrada ainda.</div>';
+    return;
+  }
+
+  lista.innerHTML = denuncias.map(d => `
+    <div class="item p-${d.prioridade}">
+      ${d.imagem ? `<img src="${d.imagem}" alt="Foto da denúncia">` : ''}
+      <div class="info">
+        <h3>${escapeHtml(d.local)}</h3>
+        <div class="autor">👤 ${escapeHtml(d.autor || 'Anônimo')}</div>
+        <p>${escapeHtml(d.descricao || 'Sem descrição')}</p>
+        <div>
+          <span class="tag ${d.prioridade}">${d.prioridade.toUpperCase()}</span>
+          <span class="tag status">${d.status}</span>
+        </div>
+        <p style="margin-top:8px;font-size:0.78rem;color:#6b8a6b;">
+          🤖 ${d.diagnostico}<br>
+          📅 ${d.data}
+        </p>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escapeHtml(t) {
+  const div = document.createElement('div');
+  div.textContent = t;
+  return div.innerHTML;
+}
+
+// ===================== INICIALIZA =====================
+if (usuarioLogado) {
+  entrarApp();
+} else {
+  document.getElementById('authScreen').classList.remove('hidden');
+  document.getElementById('appPrincipal').classList.add('hidden');
+}
+</script>
+
+</body>
+</html>
